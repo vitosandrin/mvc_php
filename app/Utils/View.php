@@ -30,10 +30,6 @@ class View
         $keys = array_map(function($item){
             return '{{'.$item.'}}';
         },$keys);
-        
-        echo "<pre>";
-        print_r($keys);
-        echo "</pre>";
 
         return str_replace($keys, array_values($vars), $contentView);
     }

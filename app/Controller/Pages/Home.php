@@ -1,17 +1,24 @@
 <?php
 
 namespace App\Controller\Pages;
-
+/* Use View */
 use \App\Utils\View;
+/* Use BD */
+use \App\Model\Entity\Organization;
 
-class Home
+/* Home extends para Page dinâmica */
+class Home extends Page
 {
     /* Controller resposável por retornar a view Home */
     public static function getHome()
     {
-        return View::render('pages/home', [
-            'name' => 'Vito Sandrin',
-            'description' => 'isso é um teste'
+        $obOrganization = new Organization;
+
+        //View Home
+        $content = View::render('pages/home', [
+            'name' => $obOrganization->name,
+            'description' => $obOrganization->description
         ]);
+        return parent::getPage('HomePage ', $content);
     }
 }
