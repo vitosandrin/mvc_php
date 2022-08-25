@@ -59,6 +59,7 @@ class Response
     public function addHeader($key, $value){
         $this->headers[$key] = $value;
     }
+    
     /**
      * Método responsável por enviar os headers para o navegador 
      */

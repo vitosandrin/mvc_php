@@ -38,6 +38,7 @@ class Router
     {
         $this->request = new Request();
         $this->url = $url;
+        $this->setPrefix();
     }
 
     /**
@@ -86,10 +87,39 @@ class Router
     }
 
     /**
+     * Método responsavel por defirnir uma rota de POST 
+     * @param string $route
+     * @param array $params
+     */
+    public function post($route, $params = [])
+    {
+        return $this->addRoute('POST', $route, $params);
+    }
+
+    /**
+     * Método responsavel por defirnir uma rota de PUT 
+     * @param string $route
+     * @param array $params
+     */
+    public function put($route, $params = [])
+    {
+        return $this->addRoute('PUT', $route, $params);
+    }
+
+    /**
+     * Método responsavel por defirnir uma rota de DELETE 
+     * @param string $route
+     * @param array $params
+     */
+    public function delete($route, $params = [])
+    {
+        return $this->addRoute('DELETE', $route, $params);
+    }
+
+    /**
      * Método responsável por retornar a URI sem o prefixo 
      * @return string
      */
-
     private function getUri()
     {
         //URI DA REQUEST
@@ -120,8 +150,10 @@ class Router
             if (preg_match($patternRoute, $uri)) {
                 //VERIFICA O MÉTODO
                 if ($methods[$httpMethod]) {
+                    //RETORNO DOS PARAMS DAS ROTAS
                     return $methods[$httpMethod];
                 }
+
                 //MÉTODO NÃO PERMITIDO DEFINIDO 
                 throw new Exception("Método não permitido!", 405);
             }
@@ -138,6 +170,15 @@ class Router
         try {
             //OBTEM A ROTA ATUAL
             $route = $this->getRoute();
+
+            //VERIFICA O CONTROLADOR 
+            if(!isset($route['controller'])){
+                throw new Exception("A URL não pode ser processada", 500);
+            }
+            //ARGUMENTOS DA FUNÇÃO
+            $args = [];
+            //RETORNA A EXECUÇÃO DA FUNÇÃO
+            return call_user_func_array($route['controller'], $args);
         } catch (Exception $e) {
             return new Response($e->getCode(), $e->getMessage());
         }
