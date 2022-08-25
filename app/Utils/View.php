@@ -7,6 +7,20 @@ namespace App\Utils;
 class View
 {
     /**
+     * Variáveis padrões da view
+     * @var array
+     */
+    private static $vars = [];
+
+    /**
+     * Método responsável por definir os dados iniciais da classe
+     * @param array $vars
+     */
+    public static function init($vars = [])
+    {
+        self::$vars = $vars;
+    }
+    /**
      * Método responsavel por buscar o nome da view e retornar o conteudo da view requisitada.
      * @param string $view
      * @return string
@@ -27,7 +41,8 @@ class View
     public static function render($view, $vars = [])
     {
         $contentView = self::getContentView($view);
-
+        //MERGE DE VARIAVEIS DO LAYOUT
+        $vars = array_merge(self::$vars,$vars);
         //Chaves de variaveis referenciadas nos resources 
         $keys = array_keys($vars);
         //Map para mapear as chaves que serão referenciadas no resources

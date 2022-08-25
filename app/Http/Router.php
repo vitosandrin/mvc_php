@@ -4,6 +4,7 @@ namespace App\Http;
 
 use \Closure;
 use \Exception;
+use \ReflectionFunction;
 
 class Router
 {
@@ -66,7 +67,18 @@ class Router
             if ($value instanceof Closure) {
                 $params['controller'] = $value;
                 unset($params[$key]);
+                continue;
             }
+        }
+
+        //VARIAVEIS DA ROTA
+        $params['variables'] = [];
+        
+        //PADRÃO DE VALIDAÇÃO DAS VARIAVIS DAS ROTAS
+        $patternVariable = '/{(.*?)}/';
+        if(preg_match_all($patternVariable, $route, $matches)){
+            $route = preg_replace($patternVariable, '(.*?)', $route);
+            $params['variables'] = $matches[1];
         }
 
         //PADRÃO DE VALIDAÇÃO DA URL
@@ -147,9 +159,18 @@ class Router
         //VALIDA AS ROTAS
         foreach ($this->routes as $patternRoute => $methods) {
             //VERIFICA SE A ROTA BATE COM O PADRÃO
-            if (preg_match($patternRoute, $uri)) {
+            if (preg_match($patternRoute, $uri, $matches)) {
+
                 //VERIFICA O MÉTODO
-                if ($methods[$httpMethod]) {
+                if (isset($methods[$httpMethod])) {
+                    //REMOVE A PRIMEIRA POSIÇÃO DO INDEX
+                    unset($matches[0]);
+
+                    //VARIAVEIS PROCESSADAS
+                    $keys = $methods[$httpMethod]['variables'];
+                    $methods[$httpMethod]['variables'] = array_combine($keys, $matches);
+                    $methods[$httpMethod]['variables']['request'] = $this->request;
+
                     //RETORNO DOS PARAMS DAS ROTAS
                     return $methods[$httpMethod];
                 }
@@ -177,6 +198,13 @@ class Router
             }
             //ARGUMENTOS DA FUNÇÃO
             $args = [];
+
+            //REFLECTION
+            $reflection = new ReflectionFunction($route['controller']);
+            foreach($reflection->getParameters() as $parameter){
+                $name = $parameter->getName();
+                $args[$name] = $route['variables'][$name] ?? '';
+            }
             //RETORNA A EXECUÇÃO DA FUNÇÃO
             return call_user_func_array($route['controller'], $args);
         } catch (Exception $e) {
