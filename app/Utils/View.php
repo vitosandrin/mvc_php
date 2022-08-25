@@ -3,15 +3,17 @@
 namespace App\Utils;
 
 /* View Class Management */
+
 class View
 {
     /**
-     * Método responsavel por retornar o conteudo da view requisitada.
+     * Método responsavel por buscar o nome da view e retornar o conteudo da view requisitada.
      * @param string $view
      * @return string
      */
     private static function getContentView($view)
     {
+        /* Chama a pagina como pages/home - pages/produto - etc */
         $file = __DIR__ . '/../../resources/view/' . $view . '.html';
         return file_exists($file) ? file_get_contents($file) : '';
     }
@@ -26,11 +28,14 @@ class View
     {
         $contentView = self::getContentView($view);
 
+        //Chaves de variaveis referenciadas nos resources 
         $keys = array_keys($vars);
-        $keys = array_map(function($item){
-            return '{{'.$item.'}}';
-        },$keys);
-
+        //Map para mapear as chaves que serão referenciadas no resources
+        $keys = array_map(function ($item) {
+            return '{{' . $item . '}}';
+        }, $keys);
+        /* Replace substitui o content view passando as chaves
+         e os valores das variaveis que foram mapeadas */
         return str_replace($keys, array_values($vars), $contentView);
     }
 }
