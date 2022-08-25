@@ -5,13 +5,13 @@ namespace App\Http;
 class Request
 {
     /**
-     * Método HTTP da requisição
+     * Método HTTP para criar a requisição
      * @var string 
      */
     private $httpMethod;
 
     /**
-     * URI da página
+     * URI / rota  da página
      * @var string 
      */
     private $uri;
@@ -23,7 +23,7 @@ class Request
     private $queryParams = [];
 
     /**
-     * Várivaeis recebidas no POST da pagina 
+     * Váriaveis recebidas no POST da pagina 
      * @var array
      */
     private $postVars = [];
@@ -34,6 +34,9 @@ class Request
      */
     private $headers = [];
 
+    /**
+     * Contrutor da classe
+     */
     public function __construct()
     {
         $this->queryParams = $_GET ?? [];
