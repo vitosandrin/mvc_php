@@ -5,6 +5,7 @@ namespace App\Http;
 use \Closure;
 use \Exception;
 use \ReflectionFunction;
+use \App\Http\Middleware\Queue as MiddlewareQueue;
 
 class Router
 {
@@ -70,13 +71,15 @@ class Router
                 continue;
             }
         }
+        //MIDDLEWARES DA ROTA
+        $params['middlewares'] = $params['middlewares'] ?? [];
 
         //VARIAVEIS DA ROTA
         $params['variables'] = [];
-        
+
         //PADRÃO DE VALIDAÇÃO DAS VARIAVIS DAS ROTAS
         $patternVariable = '/{(.*?)}/';
-        if(preg_match_all($patternVariable, $route, $matches)){
+        if (preg_match_all($patternVariable, $route, $matches)) {
             $route = preg_replace($patternVariable, '(.*?)', $route);
             $params['variables'] = $matches[1];
         }
@@ -193,7 +196,7 @@ class Router
             $route = $this->getRoute();
 
             //VERIFICA O CONTROLADOR 
-            if(!isset($route['controller'])){
+            if (!isset($route['controller'])) {
                 throw new Exception("A URL não pode ser processada", 500);
             }
             //ARGUMENTOS DA FUNÇÃO
@@ -201,12 +204,13 @@ class Router
 
             //REFLECTION
             $reflection = new ReflectionFunction($route['controller']);
-            foreach($reflection->getParameters() as $parameter){
+            foreach ($reflection->getParameters() as $parameter) {
                 $name = $parameter->getName();
                 $args[$name] = $route['variables'][$name] ?? '';
             }
+
+            return (new MiddlewareQueue($route['middlewares'], $route['controller'], $args))->next($this->request);
             //RETORNA A EXECUÇÃO DA FUNÇÃO
-            return call_user_func_array($route['controller'], $args);
         } catch (Exception $e) {
             return new Response($e->getCode(), $e->getMessage());
         }
@@ -215,7 +219,8 @@ class Router
      * Método responsavel por retonar a url atual 
      * @return string $url
      */
-    public function getCurrentUrl(){
-        return $this->url.$this->getUri();
+    public function getCurrentUrl()
+    {
+        return $this->url . $this->getUri();
     }
 }
