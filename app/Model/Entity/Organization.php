@@ -14,7 +14,7 @@ class Organization
      * Nome da Organização
      * @var string 
      */
-    public $name = 'Vito Sandrin';
+    public $name = 'Lorem Ipsum';
 
     /**
      * Descrição da organização
